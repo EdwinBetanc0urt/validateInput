@@ -2,7 +2,7 @@
   "name": "validateinput",
   "version": "0.1.0",
   "description": "validate text entries by keyboard",
-  "main": "validarInput.js",
+  "main": "validateInput.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
