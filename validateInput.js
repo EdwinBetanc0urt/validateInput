@@ -2,7 +2,7 @@
 /*!
  * Modulo de Validaciones
  * @required: ECMAScript 2015 (ES6)
- * @author: Edwin Betancourt <EdwinBetanc0urt@hotmail.com>
+ * @author: Edwin Betancourt <EdwinBetanc0urt@outlook.com>
  * @version 0.4
  * @created: 05-Abril-2018
  * @modificated: 08-Abril-2018
@@ -221,7 +221,7 @@ var modValidacion = (function(){
 							this.value = this.value.substr(0, 3) + "-" + this.value.substr(3);
 					}
 
-					//si el carácter en la posición final y la antepenúltima son iguales 
+					//si el carácter en la posición final y la antepenúltima son iguales
 					//y a su vez igual a un guion o un mas elimina el ultimo repetido
 					if (this.value.charAt(tam - 1) == this.value.charAt(tam - 2) && (this.value.charAt(tam - 1) == "-" || this.value.charAt(tam - 1) == "+")) {
 						//toma el valor desde la posicion cero hasta una posición menos, borrando 1 de los guiones al final
@@ -302,7 +302,7 @@ var modValidacion = (function(){
 				//enfoca si no pasa validacion
 				_elementosDOM[i].addEventListener('blur', function(pEvento) {
 					pEvento.preventDefault();
-					
+
 					// x@x.xx
 					//if( !this.value.match(/^[^\s()<>@,;:\/]+@\w[\w\.-]+\.[a-z]{1,}$/i) ) {
 					if( !this.value.match(_Patron)
@@ -453,7 +453,7 @@ var modValidacion = (function(){
 				//enfoca si no pasa validacion
 				_elementosDOM[i].addEventListener('blur', function(pEvento) {
 					pEvento.preventDefault();
-					
+
 					if( !this.value.match(_Patron)
 					&& this.value.trim() != "") {
 						setTimeout(
@@ -588,6 +588,8 @@ var modValidacion = (function(){
 			modValidacion.valida_alfabetico();
 			modValidacion.valida_alfa_numerico();
 			modValidacion.valida_correo();
+			modValidacion.valida_url();
+			modValidacion.valida_ip();
 			modValidacion.valida_direccion();
 			modValidacion.valida_num_telefono();
 			modValidacion.valida_num_real();
