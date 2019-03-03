@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Example validateInput</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <!--
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    -->
+  </head>
+  <body>
+    <br><br><br>
+
+    <div class="row">
+      <form class="col s12">
+        <div class="row">
+
+          <div class="input-field col s6">
+            <input id="last_name" type="text" class="validate-alphabetic">
+            <label for="last_name">Alphabetic Value</label>
+          </div>
+        
+          <div class="input-field col s6">
+            <input id="email" type="email" class="validate-email">
+            <label for="email">Email</label>
+          </div>
+
+          <div class="col s6">
+            <input id="number" type="text" class="validate-number">
+            <label for="number">Number Value</label>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script type="text/javascript" src="./validateInput.js"></script>
+    <script type="text/javascript">
+      /* initialize validation */
+      document.addEventListener('DOMContentLoaded', function() {
+        modValidacion.validateAll();
+      });
+    </script>
+  </body>
+</html>

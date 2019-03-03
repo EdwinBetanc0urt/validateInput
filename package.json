@@ -1,0 +1,29 @@
+{
+  "name": "validate-input",
+  "version": "0.1.0",
+  "description": "validate text entries by keyboard",
+  "main": "validateInput.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EdwinBetanc0urt/validateInput.git"
+  },
+  "keywords": [
+    "validate"
+  ],
+  "author": "EdwinBetanc0urt <EdwinBetanc0urt@outlook.com>",,
+  "contributors": [
+    {
+      "name": "Edwin Betancourt <EdwinBetanc0urt@outlook.com>",
+      "email": "EdwinBetanc0urt@outlook.com",
+      "url": "https://EdwinBetanc0urt.github.io"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EdwinBetanc0urt/validateInput/issues"
+  },
+  "homepage": "https://github.com/EdwinBetanc0urt/validateInput#readme"
+}
