@@ -1,5 +1,5 @@
 {
-  "name": "validateinput",
+  "name": "validate-input",
   "version": "0.1.0",
   "description": "validate text entries by keyboard",
   "main": "validateInput.js",

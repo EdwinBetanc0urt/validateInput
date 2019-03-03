@@ -6,7 +6,7 @@
  * @created: 05-Abril-2018
  * @modificated: 08-Abril-2018
  * @supported: Mozilla Firefox +58
- * @dependency: jQuery +3.3.1 para validación priece format
+ * @dependency: jQuery +3.3.1 para validateción priece format
 
 		Este programa es software libre, su uso, redistribución, y/o modificación
 	debe ser bajo los términos de las licencias indicadas, la GNU Licencia Pública
@@ -23,35 +23,51 @@
 	o repositorio de donde fue obtenida, y/o a sus AUTORES.
  */
 var modValidacion = (() => {
-	//métodos y propiedades privados
-	var _version = "ver 0.6";
+	// private methods and properties
 
 	/**
 	 * [_addEvent description]
-	 * @param       {[type]} _Selector [description]
-	 * @param       {[type]} _Event    [description]
-	 * @param       {[type]} _Pattern  [description]
+	 * @param       {String} _Selector Selectors HTML DOM (tag, #id, .class) separate with ','
+	 * @param       {Array | String} _Events    [description]
+	 * @param       {RegExp} _Pattern  [description]
+	 * @param       {String} _Replace  value to replace, default string empty ""
 	 */
-	function _addEvent(_Selector, _Event, _Pattern) {
+	function _addEvent(_Selector, _Pattern, _Events = 'blur, keyup', _Replace = '') {
 		let _domElements = document.querySelectorAll(_Selector);
-		for(let i = 0; i < _domElements.length; i++){
-			_domElements[i].addEventListener('keydown', function(_Event){
-				this.value = this.value.replace(_Pattern, '');
-			});
-			_domElements[i].addEventListener('blur', function(_Event){
-				this.value = this.value.replace(_Pattern, '');
-			});
+
+		if (! Array.isArray(_Events) || typeof _Events === 'string') {
+			_Events = _Events.split(',');
 		}
+
+		// itinerate elements DOM
+		for(let i = 0; i < _domElements.length; i++){
+			// itinerate array events
+			for (let j = 0; j < _Events.length; j++) {
+				_addIndividualEnvent(
+					_domElements[i],
+					_Pattern,
+					_Events[j].trim(),
+					_Replace
+				);
+			}
+		}
+	}
+
+	function _addIndividualEnvent(_Selector, _Pattern, _Event, _Replace = '') {
+		// add event into DOM
+		_Selector.addEventListener(_Event, function(event){
+			this.value = this.value.replace(_Pattern, _Replace);
+		});
 	}
 
 	return {
 		//métodos y propiedades públicos
 
 		/**
-		 * validation so that it does not allow you to start typing with spaces and/or
+		 * validatetion so that it does not allow you to start typing with spaces and/or
 		 * do not allow 2 consecutive spaces at the end
 		 */
-		validate_spaces: () => {
+		validatete_spaces: () => {
 			let _domElements = document.querySelectorAll(
 				"textarea, " +
 				"input[type=text], input[type=number], input[type=password], " +
@@ -81,8 +97,8 @@ var modValidacion = (() => {
 
 		//removes the accents and diacritics
 		value_without_diacritic: (
-				_Selector = '.value_without_diacritic, .valor_sin_diacriticos',
-				 _Language = 'es') => {
+			_Selector = '.value_without_diacritic, .valor_sin_diacriticos',
+			_Language = 'es') => {
 			let _idiomaHTML = window.navigator.language || navigator.browserLanguage;
 			let _domElements = document.querySelectorAll(_Selector);
 			let _es = ['es', 'es-ES', 'español', 'spanish'];
@@ -107,10 +123,10 @@ var modValidacion = (() => {
 			}
 		},
 
-		//validación para el ancho máximo de los input number, ya que por diseño
+		//validateción para el ancho máximo de los input number, ya que por diseño
 		//solo admite el atributo min y max
-		valida_maximo: () => {
-			let _domElements = document.querySelectorAll("input[type=number]");
+		validate_maximo: (_Selector = "input[type=number]") => {
+			let _domElements = document.querySelectorAll(_Selector);
 			//Recorremos cada uno de nuestros elementos DOM HTML
 			for(let i = 0; i < _domElements.length; i++){
 				_domElements[i].addEventListener('input', function(_Event) {
@@ -188,25 +204,15 @@ var modValidacion = (() => {
 			};
 		},
 
-		//validaciones para valores NUMERICOS con 0 antes
-		valida_numerico: (_Selector = '.valida_numerico') => {
+		//validateciones para valores NUMERICOS con 0 antes
+		validateNumber: (_Selector = '.validate-number') => {
 			let _Pattern = /[^0-9]/g;
-			let _domElements = document.querySelectorAll(_Selector);
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event) {
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event) {
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
 		//MEJORAR VALIDACION DEL PRIMER CARACTER EN 0 CON EXPRESIONES REGULARES
-		//valida que solo sean números enteros
-		valida_num_entero: (_Selector = '.valida_num_entero') => {
+		//validate que solo sean números enteros
+		validate_num_entero: (_Selector = '.validate_num_entero') => {
 			let _Pattern = /[^0-9]/g;
 			//let _Pattern = /^[0-9]{0,12}([,][0-9]{2,2})?$/g;
 			///let _Pattern = /^[0-9]{0,12}([,][0-9]{2,2})?$/g;
@@ -237,41 +243,21 @@ var modValidacion = (() => {
 			}
 		},
 
-		//valida que solo sean letras de la A a la Z
-		valida_alfabetico: (_Selector = '.valida_alfabetico') => {
+		// validate only letters from A to Z
+		validateAlphabetic: (_Selector = '.validate-alphabetic') => {
 			let _Pattern = /[^a-zA-Zá-úÁ-Úä-üÄ-Üà-ùÀ-Ù ]/gi;
 			//let _Pattern = /[0-9¨´`~!@#$%^&*()_°¬|+\-=¿?;:'",.<>\{\}\[\]\\\/]/gi;
-			let _domElements = document.querySelectorAll(_Selector);
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_alfa_numerico: (_Selector = '.valida_alfa_numerico') => {
+		validateAlfaNumeric: (_Selector = '.validate-alphanumeric') => {
 			let _Pattern = /[¨´`'"~!@#$%^&*()_°¬|+\-=?;:,._ç*+/¡<>\{\}\[\]\\\/]/gi;
-			let _domElements = document.querySelectorAll(_Selector);
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
-		//validaciones para NUMEROS DE TELEFONO Y FAX, locales e internacionales
-		//falta validar que no repita mas de 1 vez el guion y el mas
-		valida_num_telefono: (_Selector = '.valida_num_telefono') => {
+		//validateciones para NUMEROS DE TELEFONO Y FAX, locales e internacionales
+		//falta validater que no repita mas de 1 vez el guion y el mas
+		validate_num_telefono: (_Selector = '.validate_num_telefono') => {
 			let _Pattern = /[^0-9+-]/gi;
 			let _domElements = document.querySelectorAll(_Selector);
 
@@ -279,7 +265,7 @@ var modValidacion = (() => {
 			for(let i = 0; i < _domElements.length; i++){
 				_domElements[i].addEventListener('keyup', function(_Event){
 					this.value = this.value.replace(_Pattern, '');
-					//valida la primera posición sea un cero o un mas
+					//validate la primera posición sea un cero o un mas
 					tam = this.value.length; //toma el tamaño de la cadena
 					//sino identifica inicialmente el + toma un cero
 					if (this.value.charAt(0) != "+") {
@@ -302,7 +288,7 @@ var modValidacion = (() => {
 				});
 				_domElements[i].addEventListener('blur', function(_Event){
 					this.value = this.value.replace(_Pattern, '');
-					//valida la primera posición sea un cero o un mas
+					//validate la primera posición sea un cero o un mas
 					tam = this.value.length; //toma el tamaño de la cadena
 					//sino identifica inicialmente el + toma un cero
 					if (this.value.charAt(0) != "+") {
@@ -326,21 +312,11 @@ var modValidacion = (() => {
 			}
 		},
 
-		//validaciones para NUMEROS DE TELEFONO Y FAX, locales e internacionales
-		//falta validar que no repita mas de 1 vez el guion y el mas
-		valida_telefono_mundial: () => {
+		//validateciones para NUMEROS DE TELEFONO Y FAX, locales e internacionales
+		//falta validater que no repita mas de 1 vez el guion y el mas
+		validate_telefono_mundial: (_Selector = '.validate_num_telefono') => {
 			let _Pattern = /^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$/g;
-			let _domElements = document.querySelectorAll('.valida_num_telefono');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 			/*
 			+584246573321
 			+42 555.123.4567
@@ -352,80 +328,35 @@ var modValidacion = (() => {
 			*/
 		},
 
-		valida_num_real: (_Selector = ".valida_num_real") => {
+		validate_num_real: (_Selector = ".validate_num_real") => {
 			let _Pattern = /[^0-9.]/g;
-			let _domElements = document.querySelectorAll(_Selector);
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_num_banco: (_Selector = '.valida_num_banco') => {
+		validateBanckAccount: (_Selector = '.validate_num_banco, .validate_cuenta_banco') => {
 			let _Pattern = /[^0-9][-]{}$/g;
-			//let _Pattern = /^[VEJPGC][-][0-9]{7,9}[-][0-9]{1}$/g;
-			let _domElements = document.querySelectorAll(_Selector);
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(/^[VEJPGC][-][0-9]{7,9}[-][0-9]{1}$/g, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(/^[VEJPGC][-][0-9]{7,9}[-][0-9]{1}$/g, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_cuenta_banco: (_Selector = '.valida_cuenta_banco') => {
-			modValidacion.valida_num_banco(_Selector);
-		},
-
-		valida_operacion_numerica: () => {
+		validate_operacion_numerica: (_Selector = ".validate_operacion_numerica") => {
 			let _Pattern = /[^0-9.+*\-\/%=]/g;
-			let _domElements = document.querySelectorAll('.valida_operacion_numerica');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_etiqueta_html: () => {
+		validate_etiqueta_html: (_Selector = ".validate_html_tag") => {
 			//let _Pattern = /[^0-9'"a-z<>\-\/\\=_ ]/gi;
 			let _Pattern =/^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/g
-			let _domElements = document.querySelectorAll('.valida_etiqueta_html');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			}
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_correo: () => {
+		validate_correo: (_Selector = ".validate_correo") => {
 			//let _Pattern = /[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+/i;
 			let _Pattern = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{1,})$/i;
-			let _domElements = document.querySelectorAll('.valida_correo');
+			let _domElements = document.querySelectorAll(_Selector);
 
 			//Recorremos cada uno de nuestros elementos DOM HTML
 			for(let i = 0; i < _domElements.length; i++) {
-				//enfoca si no pasa validacion
+				//enfoca si no pasa validatecion
 				_domElements[i].addEventListener('blur', function(_Event) {
 					_Event.preventDefault();
 
@@ -451,127 +382,64 @@ var modValidacion = (() => {
 						console.log("correo bien");
 					}
 					//_domElements[i].focus();
+
+					//fjQuitarTildes(this.value);
 				});
 
-				//elimina los espacios
-				_domElements[i].addEventListener('keyup', function(_Event) {
-					this.value = this.value.replace(/ /gim, ''); //elimina los espacios
-					this.value = this.value.replace(/[ñ`´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/gi,'');
-					this.value = fjQuitarTildes(this.value);
-				});
+				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
 			};
 		},
 
-		valida_direccion: () => {
+		validate_direccion: (_Selector = ".validate_direccion") => {
 			let _Pattern = /[`~!@%^&$¡¨¿*_¬|+\=?;:'"<>\{\}\[\]]/gi;
-			let _domElements = document.querySelectorAll('.valida_direccion');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		// valida el grupo sanguíneo A+, A-, O+, A-
-		valida_sangre: () => {
+		// validate el grupo sanguíneo A+, A-, O+, A-
+		validate_sangre: (_Selector = ".validate_sangre") => {
 			///let _Pattern = /^[aboABO-+]/gi;
 			let _Pattern = /[^aboABO+-]/g;
-			let _domElements = document.querySelectorAll('.valida_sangre');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_rif: () => {
+		validate_rif: (_Selector = ".validate_rif") => {
 			//let _Pattern = /^([VEJPGC]{1})([0-9]{7,9})$/g;
 			let _Pattern = /^[VEJPGC][-][0-9]{7,9}[-][0-9]{1}$/g;
-			let _domElements = document.querySelectorAll('.valida_rif');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_mac: () => {
+		validate_mac: (_Selector = ".validate_mac") => {
 			let _Pattern = /[a-fA-F0-9.+_-]+:[a-fA-F0-9.+_-]+:[a-fA-F0-9.+_-]+:[a-fA-F0-9.+_-]+:[a-fA-F0-9.+_-]+:[a-fA-F0-9.+_-]+/gi;
-			let _domElements = document.querySelectorAll('.valida_mac');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_ip: () => {
+		validate_ip: (_Selector = ".validate_ip") => {
 			let _Pattern = /\b([1-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\b/g;
-			let _domElements = document.querySelectorAll('.valida_ip');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_ip_puerto: () => {
+		validate_ip_puerto: (_Selector = ".validate_ip_puerto") => {
 			let _Pattern = /[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}:[0-9]{1,5}/g;
-			let _domElements = document.querySelectorAll('.valida_ip_puerto');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_num_moneda: () => {
+		validate_num_moneda: (_Selector = ".validate_num_moneda") => {
 			let _Pattern = /^[0-9]{0,12}([,][0-9]{2,2})?$/g;
-			// validaciones para NUMEROS DECIMALES
-			$('.valida_num_moneda').keyup(function() {
+			// validateciones para NUMEROS DECIMALES
+			$('.validate_num_moneda').keyup(function() {
 				this.value = this.value.replace(/[^0-9,.]/g, '');
 
 				//Busca la coma y cambia por un punto
 				if (this.value.indexOf(","))
 					this.value = this.value.replace(/[^0-9.]/g, '.');
 
-				//valida la primera posición que no sea un cero, punto o coma
+				//validate la primera posición que no sea un cero, punto o coma
 				if (this.value.charAt(0) == "0" || this.value.charAt(0) == "." || this.value.charAt(0) == ",") {
 					this.value = this.value.substring(1);
 					this.value = this.value.replace(/[^0-9]/g, '');
 				}
 
-				//valida la posición final para que no se repitan dos comas o puntos
+				//validate la posición final para que no se repitan dos comas o puntos
 				tam = this.value.length; //toma el tamaño de la cadena
 				//si el carácter en la posición final y la antepenúltima son iguales y a su vez igual a un punto
 				if (this.value.charAt(tam - 1) == this.value.charAt(tam - 2) && this.value.charAt(tam - 1) == ".") {
@@ -581,7 +449,7 @@ var modValidacion = (() => {
 			});
 
 			if(typeof priceFormat === 'function') {
-				$('.valida_moneda_bolivares').priceFormat({
+				$('.validate_moneda_bolivares').priceFormat({
 					prefix: '', //simbolo de moneda que va al principio (predeterminado toma USD$)
 					suffix: '', //simbolo de moneda que va al final
 					centsSeparator: '.', //separador de sentimos
@@ -590,7 +458,7 @@ var modValidacion = (() => {
 					//allowNegative: true //permite negativos
 				});
 			}
-			let _domElements = document.querySelectorAll('.valida_direccion');
+			let _domElements = document.querySelectorAll('.validate_direccion');
 			//Recorremos cada uno de nuestros elementos DOM HTML
 			for(let i = 0; i < _domElements.length; i++){
 				_domElements[i].addEventListener('keyup', function(_Event){
@@ -599,16 +467,16 @@ var modValidacion = (() => {
 			};
 		},
 
-		valida_url: () => {
+		validate_url: (_Selector = ".validate_url") => {
 			//let _Pattern = /([--:\w?@%&+~#=]*\.[a-z]{2,4}\/{0,2})((?:[?&](?:\w+)=(?:\w+))+|[--:\w?@%&+~#=]+)?/;
 			let _Pattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
 			//let _Pattern = /^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)( [a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$/;
 			//let _Pattern = /^((ht|f)tp(s?)\:\/\/)?[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)( [a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$/;
-			let _domElements = document.querySelectorAll('.valida_url');
+			let _domElements = document.querySelectorAll('.validate_url');
 
 			//Recorremos cada uno de nuestros elementos DOM HTML
 			for(let i = 0; i < _domElements.length; i++) {
-				//enfoca si no pasa validacion
+				//enfoca si no pasa validatecion
 				_domElements[i].addEventListener('blur', function(_Event) {
 					_Event.preventDefault();
 
@@ -628,162 +496,85 @@ var modValidacion = (() => {
 					else {
 						console.log("url bien");
 					}
-				});
-
-				//elimina los espacios
-				_domElements[i].addEventListener('keyup', function(_Event) {
-					this.value = this.value.replace(/ /gim, ''); //elimina los espacios
-					this.value = this.value.replace(/[ñ`´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/gi,'');
 					this.value = fjQuitarTildes(this.value);
 				});
+
+				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
 			};
 		},
 
-		valida_tiempo: () => {
+		validate_tiempo: (_Selector = ".validate_tiempo") => {
 			let _Pattern = /([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?/g;
 			//let _Pattern = /^(0[1-9]|1\d|2[0-3]):([0-5]\d):([0-5]\d)$/g;
 			//let _Pattern = /^(0[1-9]|1\d|2[0-3]):([0-5]\d):([0-5]\d)$/g;
-			let _domElements = document.querySelectorAll('.valida_tiempo');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_fecha: () => {
+		validate_fecha: (_Selector = ".validate_fecha") => {
 			let _Pattern = /(0[1-9]|[12][0-9]|3[01])[\/.](0[13578]|1[02])[\/.](20)[0-9]{2}|(0[1-9]|[12][0-9]|30)[\/.](0[469]|11)[\/.](20)[0-9]{2}|(0[1-9]|1[0-9]|2[0-8])[\/.](02)[\/.](20)[0-9]{2}|29[\/.](02)[\/.](((20)(04|08|[2468][048]|[13579][26]))|2000)/g;
 			//let _Pattern = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/g;
-			let _domElements = document.querySelectorAll('.valida_fecha');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_fecha_tiempo: () => {
+		validate_fecha_tiempo: (_Selector = ".validate_fecha_tiempo") => {
 			let _Pattern = /^([1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3}$/g;
-			let _domElements = document.querySelectorAll('.valida_fecha_tiempo');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_codigo_postal: () => {
+		validate_codigo_postal: (_Selector = ".validate_codigo_postal") => {
 			let _Pattern = /((0[1-9]|1[0-2])\-(0[1-9]|1[0-9]|2[0-9]|3[01])\-\d{4})(\s+)(([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])|24:00:00)/g;
-			let _domElements = document.querySelectorAll('.valida_codigo_postal');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_color_hex: () => {
+		validate_color_hex: (_Selector = ".validate_color_hex") => {
 			let _Pattern = /[#]([\dA-F]{6}|[\dA-F]{3})/g;
-			let _domElements = document.querySelectorAll('.valida_color_hex');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_direccion_bitcoin: () => {
+		validate_direccion_bitcoin: (_Selector = ".validate_direccion_bitcoin") => {
 			let _Pattern = /([13][a-km-zA-HJ-NP-Z0-9]{26,33})/g;
-			let _domElements = document.querySelectorAll('.valida_direccion_bitcoin');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_hastag: () => {
+		validate_hastag: (_Selector = ".validate_hastag") => {
 			let _Pattern = /([@][A-z]+)|([#][A-z]+)/g;
-			let _domElements = document.querySelectorAll('.valida_hastag');
-
-			//Recorremos cada uno de nuestros elementos DOM HTML
-			for(let i = 0; i < _domElements.length; i++){
-				_domElements[i].addEventListener('keyup', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-				_domElements[i].addEventListener('blur', function(_Event){
-					this.value = this.value.replace(_Pattern, '');
-				});
-			};
+			_addEvent(_Selector, _Pattern);
 		},
 
-		valida_todo: () => {
-			modValidacion.validate_spaces();
+		validateAll: () => {
+			modValidacion.validatete_spaces();
 			modValidacion.value_without_diacritic();
 			modValidacion.valor_minuscula();
 			modValidacion.valor_mayuscula_primera();
 			modValidacion.valor_capitalize();
 			modValidacion.valor_mayuscula();
-			//modValidacion.valida_maximo();
+			//modValidacion.validate_maximo();
 
-			modValidacion.valida_numerico();
-			modValidacion.valida_num_entero();
-			modValidacion.valida_alfabetico();
-			modValidacion.valida_sangre();
-			modValidacion.valida_alfa_numerico();
-			modValidacion.valida_correo();
-			modValidacion.valida_direccion();
-			modValidacion.valida_num_telefono();
-			modValidacion.valida_num_real();
-			modValidacion.valida_operacion_numerica();
-			modValidacion.valida_etiqueta_html();
-			modValidacion.valida_num_banco();
+			modValidacion.validateNumber();
+			modValidacion.validate_num_entero();
+			modValidacion.validateAlphabetic();
+			modValidacion.validate_sangre();
+			modValidacion.validateAlfaNumeric();
+			modValidacion.validate_correo();
+			modValidacion.validate_direccion();
+			modValidacion.validate_num_telefono();
+			modValidacion.validate_num_real();
+			modValidacion.validate_operacion_numerica();
+			modValidacion.validate_etiqueta_html();
+			modValidacion.validateBanckAccount();
 		},
 
-		validar_inner: () => {
-			modValidacion.valida_numerico();
-			modValidacion.valida_num_entero();
-			modValidacion.valida_alfabetico();
-			modValidacion.valida_alfa_numerico();
-			console.log("Reasignada la validación a los innerHTML ");
+		validater_inner: () => {
+			modValidacion.validateAll();
+			console.log("Reasignada la validateción a los innerHTML ");
 		}
-	} //fin del return
+	} // end return
 })();
 
-function valida_todo() {
-	modValidacion.valida_todo();
+function validateAll() {
+	modValidacion.validateAll();
 }
 
-function validar_inner() {
-	modValidacion.validar_inner();
+function validater_inner() {
+	modValidacion.validater_inner();
 }
