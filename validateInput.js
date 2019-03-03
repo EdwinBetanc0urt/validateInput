@@ -41,16 +41,23 @@ var modValidacion = (() => {
 
 		// itinerate elements DOM
 		for(let i = 0; i < _domElements.length; i++){
-			// itinerate events
+			// itinerate array events
 			for (let j = 0; j < _Events.length; j++) {
-				let event = _Events[j].trim()
-
-				// add event into DOM
-				_domElements[i].addEventListener(event, function(event){
-					this.value = this.value.replace(_Pattern, _Replace);
-				});
+				_addIndividualEnvent(
+					_domElements[i],
+					_Pattern,
+					_Events[j].trim(),
+					_Replace
+				);
 			}
 		}
+	}
+
+	function _addIndividualEnvent(_Selector, _Pattern, _Event, _Replace = '') {
+		// add event into DOM
+		_Selector.addEventListener(_Event, function(event){
+			this.value = this.value.replace(_Pattern, _Replace);
+		});
 	}
 
 	return {
@@ -375,14 +382,11 @@ var modValidacion = (() => {
 						console.log("correo bien");
 					}
 					//_domElements[i].focus();
+
+					//fjQuitarTildes(this.value);
 				});
 
-				//elimina los espacios
-				_domElements[i].addEventListener('keyup', function(_Event) {
-					this.value = this.value.replace(/ /gim, ''); //elimina los espacios
-					this.value = this.value.replace(/[ñ`´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/gi,'');
-					this.value = fjQuitarTildes(this.value);
-				});
+				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
 			};
 		},
 
@@ -492,14 +496,10 @@ var modValidacion = (() => {
 					else {
 						console.log("url bien");
 					}
-				});
-
-				//elimina los espacios
-				_domElements[i].addEventListener('keyup', function(_Event) {
-					this.value = this.value.replace(/ /gim, ''); //elimina los espacios
-					this.value = this.value.replace(/[ñ`´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/gi,'');
 					this.value = fjQuitarTildes(this.value);
 				});
+
+				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
 			};
 		},
 
