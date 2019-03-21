@@ -1,13 +1,12 @@
 /**
- * Modulo de Validaciones
+ * Modulo de Validaciones de entrada de Texto
  * @required: ECMAScript 2015 (ES6)
  * @author: Edwin Betancourt <EdwinBetanc0urt@outlook.com>
  * @version 0.6
  * @created: 05-Abril-2018
- * @modificated: 08-Abril-2018
- * @supported: Mozilla Firefox +58
  * @dependency: jQuery +3.3.1 para validateción priece format
 
+ * @description:
 		Este programa es software libre, su uso, redistribución, y/o modificación
 	debe ser bajo los términos de las licencias indicadas, la GNU Licencia Pública
 	General (GPL) publicada por la Fundación de Software Libre(FSF) de la versión
@@ -23,16 +22,21 @@
 	o repositorio de donde fue obtenida, y/o a sus AUTORES.
  */
 var modValidacion = (() => {
+
 	// private methods and properties
+	const _inputs_html = 'textarea, input[type=text], input[type=password], ' +
+		'input[type=number],  input[type=date], input[type=email], input[type=url], ' +
+		'input[type=tel], input[type=datetime-local], input[type=search], ' +
+		'input[type=month], input[type=time], input[type=week]';
 
 	/**
 	 * [_addEvent description]
 	 * @param       {String} _Selector Selectors HTML DOM (tag, #id, .class) separate with ','
-	 * @param       {Array | String} _Events    [description]
-	 * @param       {RegExp} _Pattern  [description]
-	 * @param       {String} _Replace  value to replace, default string empty ""
+	 * @param       {Array | String} _Events    DOM Events to add in HTML inputs
+	 * @param       {RegExp} _Pattern  Pattern in regular expresion
+	 * @param       {String} _Replace  Value to replace, default string empty ""
 	 */
-	function _addEvent(_Selector, _Pattern, _Events = 'blur, keyup', _Replace = '') {
+	const _addEvent = (_Selector, _Pattern, _Events = 'blur, keyup', _Replace = '') => {
 		let _domElements = document.querySelectorAll(_Selector);
 
 		if (! Array.isArray(_Events) || typeof _Events === 'string') {
@@ -51,20 +55,54 @@ var modValidacion = (() => {
 				);
 			}
 		}
-	}
+	};
 
-	function _addIndividualEnvent(_Selector, _Pattern, _Event, _Replace = '') {
+	/**
+	 * 
+	 * @param {*} _Selector 
+	 * @param {*} _Pattern 
+	 * @param {*} _Event 
+	 * @param {*} _Replace 
+	 */
+	const _addIndividualEnvent = (_Selector, _Pattern, _Event, _Replace = '') => {
 		// add event into DOM
-		_Selector.addEventListener(_Event, function(event){
+		_Selector.addEventListener(_Event, (event) => {
 			this.value = this.value.replace(_Pattern, _Replace);
 		});
-	}
+	};
+
+	/**
+	 * Remove accents in text and replace with equivalent letter
+	 * @param {String} _Text 
+	 */
+	const _removeAccents = (_Text) => {
+		//console.log("palabra actual: " + _Text);
+		/*
+		_Text = _Text.replace(/[ñ]/n, 'n');
+		_Text = _Text_Text.replace(/[ç]/, 'c');
+		*/
+		_Text = _Text
+			.replace(/[áäàâãå]/gi, 'a')
+			.replace(/[ÁÄÂÃÀ]/gi, 'A')
+			.replace(/[éëè]/gi, 'e')
+			.replace(/[ÉËÊÈ]/gi, 'E')
+			.replace(/[íïîì]/gi, 'i')
+			.replace(/[ÍÏÎÌ]/gi, 'I')
+			.replace(/[óöôò]/gi, 'o')
+			.replace(/[ÓÖÔÒ]/gi, 'O')
+			.replace(/[úüûù]/gi, 'u')
+			.replace(/[ÚÜÛÙ]/gi, 'U')
+			.replace(/[ýÿ]/gi, 'y')
+			.replace(/[Ý]/gi, 'Y');
+	
+		return _Text;
+	};
 
 	return {
 		//métodos y propiedades públicos
 
 		/**
-		 * validatetion so that it does not allow you to start typing with spaces and/or
+		 * validation so that it does not allow you to start typing with spaces and/or
 		 * do not allow 2 consecutive spaces at the end
 		 */
 		validatete_spaces: () => {
@@ -93,6 +131,11 @@ var modValidacion = (() => {
 					this.value = this.value.replace(/ +/gim, ' ');
 				});
 			}
+		},
+
+		validatete_no_spaces: (_Selector = '.validatete_no_spaces') => {
+			let _Pattern = / /gim;
+			_addEvent(_Selector, _Pattern);
 		},
 
 		//removes the accents and diacritics
@@ -383,7 +426,7 @@ var modValidacion = (() => {
 					}
 					//_domElements[i].focus();
 
-					//fjQuitarTildes(this.value);
+					//_removeAccents(this.value);
 				});
 
 				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
@@ -496,7 +539,7 @@ var modValidacion = (() => {
 					else {
 						console.log("url bien");
 					}
-					this.value = fjQuitarTildes(this.value);
+					this.value = _removeAccents(this.value);
 				});
 
 				_addIndividualEnvent(_domElements[i], /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/, 'keyup');
