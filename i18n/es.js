@@ -14,6 +14,7 @@ const es = {
 		validateIpWithPort: '.validar-ip-con-puerto',
 		validateMacAddress: '.validar-direccion-mac',
 		validateNumber: '.validar-numero',
+		validateRif: '.validar-rif',
 		validateWithoutDiacritics: '.valor-sin-diacriticos',
 		validateWithoutSpaces: '.validar-sin-espacios',
 		valueCapitalize: '.valor-capitalizado',
