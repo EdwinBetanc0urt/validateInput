@@ -32,6 +32,63 @@ const validateInput = (function() {
 		'input[type=date], input[type=datetime-local], input[type=search], ' +
 		'input[type=month], input[type=time], input[type=week]';
 
+	// source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+	const escapeRegExp =  function(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	};
+
+	const isEmptyValue = function(value) {
+		const typeOfValue = Object.prototype
+			.toString
+			.call(value)
+			.match(/^\[object\s(.*)\]$/)[1];
+		//	.replace(/[\[\]\s]/g, '')
+		//	.replace('object', '');
+
+		// '[object typeOfValue']
+		switch (typeOfValue) {
+			case 'Undefined':
+			case 'Error':
+			case 'Null':
+				return true
+				break;
+			case 'Boolean':
+			case 'Date':
+			case 'Function': // Or class
+			case 'Math': // TODO: Evaluate as number
+			case 'RegExp':
+				return false;
+				break;
+			case 'String':
+				return Boolean(!value.trim().length);
+				break;
+			case 'Number':
+				if (Number.isNaN(value)) {
+					return true;
+				}
+				return false;
+				break
+			case 'JSON':
+				if (value.trim().length) {
+					return Boolean(value.trim() === '{}');
+				}
+				return true;
+				break;
+			case 'Object':
+				return Boolean(!Object.keys(value).length);
+				break;
+			case 'Arguments':
+			case 'Array':
+				return Boolean(!value.length);
+				break;
+			case 'Map':
+			case 'Set'
+				return Boolean(!value.size);
+				break;
+		}
+		return true;
+	};
+
 	/**
 	 * [_addEvent description]
 	 * @param {string} selector, Selectors HTML DOM (tag, #id, .class) separate with ','
@@ -89,6 +146,7 @@ const validateInput = (function() {
 		valueToReplace = '',
 		functionToValidate
 	}) {
+		// build standard validate function
 		if (typeof functionToValidate !== 'function') {
 			functionToValidate = function() {
 				this.value = this.value.replace(pattern, valueToReplace);
@@ -99,7 +157,7 @@ const validateInput = (function() {
 		selector.addEventListener(eventToActivate, functionToValidate);
 	};
 
-	const notRunnableMethods = ['init', 'getLang', 'runValidations', 'validateDefault', 'validateAll'];
+	const notRunnableMethods = ['init', 'getLang', 'runValidations', 'validateAll', 'validateDefault'];
 
 	/**
 	 * Remove accents in text and replace with equivalent letter
@@ -154,6 +212,10 @@ const validateInput = (function() {
 			return this;
 		},
 
+		getLang: function() {
+			return language;
+		},
+
 		runValidations(validationsList = []) {
 			if (typeof validationsList === 'string') {
 				validationsList = validationsList.split(',');
@@ -184,21 +246,6 @@ const validateInput = (function() {
 			return this;
 		},
 
-		getLang: function() {
-			return language;
-		},
-
-		validateDefault: function() {
-			this.validateAlphabetic();
-			this.validateAlphaNumeric();
-			this.validateConsecutiveSpaces();
-			this.validateEmail();
-			this.validateNumber();
-			this.validateWithoutDiacritics();
-			this.validateWithoutSpaces();
-			return this;
-		},
-
 		validateAll: function() {
 			const validateFunctions = this;
 			const lengthNotRunable = notRunnableMethods.length;
@@ -211,6 +258,17 @@ const validateInput = (function() {
 			for (const functionName in validateFunctions) {
 				this[functionName].call();
 			}
+			return this;
+		},
+
+		validateDefault: function() {
+			this.validateAlphabetic();
+			this.validateAlphaNumeric();
+			this.validateConsecutiveSpaces();
+			this.validateEmail();
+			this.validateNumber();
+			this.validateWithoutDiacritics();
+			this.validateWithoutSpaces();
 			return this;
 		},
 
@@ -308,27 +366,59 @@ const validateInput = (function() {
 
 			const overWriteFunction = function(event) {
 				event.preventDefault();
+				this.setCustomValidity('');
 
 				// x@x.xx
 				// if( !this.value.match(/^[^\s()<>@,;:\/]+@\w[\w\.-]+\.[a-z]{1,}$/i) ) {
 				// x@xx.x
 				// if (!(/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)/.test(this.value)) ) {
 				// if (!(/^\w+([\.\-\_]?\w+)*@\w+([\.\-\_]?\w+)*([\.\-\_]?\w{1,})+$/.test(this.value)) ) {
-				if (!this.value.match(pattern) && this.value.trim() != '') {
+				if (!this.value.match(pattern) && this.value.trim() !== '') {
 					setTimeout(function() {
 						this.focus();
 					}, 10);
 					console.log('correo malo');
+					this.setCustomValidity('invalid your username!');
+
+					//this.setCustomValidity('');
+					//this.checkValidity();
 				}
-				else if (this.value.trim() == '') {
+				else if (this.value.trim() === '') {
 					console.log('correo vacio');
+					this.setCustomValidity('Enter your username!');
+					// this.setCustomValidity('Enter your username');
 				}
 				else {
 					console.log('correo bien');
 				}
+
+				// this.setCustomValidity('');
+				this.checkValidity();
+				this.reportValidity();
 			};
 
+			const otherFunction = function() {
+				let pattern = /(^[\w\d]+)(@)([\w\d]+)(\.)([\w\d]+)$/gi;
+				console.log(this.value.split(pattern))
+			};
 			selector = getSelector(selector, 'validateEmail');
+
+			const test = function() {
+				console.log(123, this.value);
+				if(this.value === '') {
+					this.setCustomValidity('Enter your username!');
+				} else {
+					this.setCustomValidity('Usernames can only contain upper and lowercase letters. Try again!');
+				}
+			};
+			/*
+			_addEvent({
+				selector,
+				functionToValidate: otherFunction,
+				eventsList: ['keyup']
+			});
+			*/
+			//*
 			_addEvent({
 				selector,
 				pattern: /[ñ` ´~!#%^&$¡¨¿*()°¬|+\=?,;:'"<>\{\}\[\]\\\/]/,
@@ -339,6 +429,13 @@ const validateInput = (function() {
 				eventsList: ['blur'],
 				functionToValidate: overWriteFunction
 			});
+
+			_addEvent({
+				selector,
+				eventsList: ['invalid'],
+				functionToValidate: test
+			});
+			//*/
 			return this;
 		},
 
@@ -350,6 +447,7 @@ const validateInput = (function() {
 		},
 
 		validateHexadecimalColour: function(selector = '.validate-hexadecimal-colour') {
+			// const pattern = /(\xhhhhhh)|(\xhhh)/g;
 			const pattern = /[#]([\dA-F]{6}|[\dA-F]{3})/g;
 			selector = getSelector(selector, 'validateHexadecimalColour');
 			_addEvent({ selector, pattern });
@@ -382,7 +480,7 @@ const validateInput = (function() {
 
 			const overWriteFunction = function() {
 				this.value = this.value.replace(pattern, '');
-				while(this.value.charAt(0) == '0') {
+				while (this.value.charAt(0) === '0') {
 					this.value = this.value.substring(1);
 				}
 			};
@@ -469,15 +567,15 @@ const validateInput = (function() {
 				let maxlength = this.getAttribute('maxlength');
 				// the condition is necessary because type numbers do not handle
 				// the maxlength attribute
-				if (maxlength == undefined || maxlength == null) {
+				if (isEmptyValue(maxlength)) {
 					// if the max attribute is defined
 					const max = this.getAttribute('max');
 					// break function without attribute
-					if (max == undefined || max == null) {
+					if (isEmptyValue(max)) {
 						return;
 					}
 					maxlength = max.length;
-					// if (max == 0 && this.value > 0) {
+					// if (max === 0 && this.value > 0) {
 					//	maxlength = 0;
 					// }
 				}
@@ -529,23 +627,23 @@ const validateInput = (function() {
 
 				// validate that the first position is a 0 or a +
 				// but initially identifies the + takes a 0 and vice versa
-				if (this.value.charAt(0) != '+') {
+				if (this.value.charAt(0) !== '+') {
 					this.value = '0' + this.value.substr(1);
-					if (length == 4 && this.value.charAt(4) != '-')
+					if (length === 4 && this.value.charAt(4) !== '-')
 						this.value = this.value.substr(0, 4) + '-' + this.value.substr(5);
 				}
 				else {
 					this.value = '+' + this.value.substr(1);
-					if (length == 3 && this.value.charAt(4) != '-')
+					if (length === 3 && this.value.charAt(4) !== '-')
 						this.value = this.value.substr(0, 3) + '-' + this.value.substr(3);
 				}
 
 				// if the character in the final position and the antepenultimate
 				// position are the same and in turn equal to a script or a plus
 				// eliminates the last repeat
-				if (this.value.charAt(length - 1) == this.value.charAt(length - 2) &&
-					(this.value.charAt(length - 1) == '-' ||
-					this.value.charAt(length - 1) == '+')) {
+				if (this.value.charAt(length - 1) === this.value.charAt(length - 2) &&
+					(this.value.charAt(length - 1) === '-' ||
+					this.value.charAt(length - 1) === '+')) {
 					// takes the value from the zero position to one less position,
 					// deleting 1 of the dashes at the end
 					this.value = this.value.substr(0, length - 1);
@@ -627,13 +725,13 @@ const validateInput = (function() {
 			const overWriteFunction = function(event) {
 				event.preventDefault();
 
-				if (!this.value.match(pattern) && this.value.trim() != '') {
+				if (!this.value.match(pattern) && this.value.trim() !== '') {
 					setTimeout(function() {
 						this.focus();
 					}, 10);
 					console.log('url mala');
 				}
-				else if (this.value.trim() == '') {
+				else if (this.value.trim() === '') {
 					console.log('url vacia');
 				}
 				else {
@@ -702,8 +800,14 @@ const validateInput = (function() {
 			return this;
 		},
 
+		/**
+		 * Matches a space character, including space, tab, page jump, line jump,
+		 * and carriage return. Example:
+		 * ' This is a example ' => 'Thisisaexample'
+		 * '	This	is	a	example	' => 'Thisisaexample'
+		 */
 		validateWithoutSpaces: function(selector = '.validate-no-spaces') {
-			const pattern = / /gim;
+			const pattern = /\s/gim;
 			selector = getSelector(selector, 'validateAlphaNumeric');
 			_addEvent({ selector, pattern });
 			return this;
